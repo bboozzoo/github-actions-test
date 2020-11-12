@@ -1,9 +1,9 @@
 name: Tests
 on:
   pull_request:
-    branches: [ master, release/** ]
+    branches: [ main, release/** ]
   push:
-    branches: [ master, release/** ]
+    branches: [ main, release/** ]
 
 jobs:
   spread-nested:
@@ -13,25 +13,25 @@ jobs:
       uses: actions/checkout@v2
     - name: Run a one-line script
       run: echo Hello, world!
-    # - name: Cache snapd test results
-    #   id: cache-snapd-test-results
-    #   uses: actions/cache@v1
-    #   with:
-    #     path: "${{ github.workspace }}/.test-results"
-    #     key: "${{ github.run_id }}-${{ github.job }}-${{ matrix.system }}-nested-results"
-    # - name: Check cached test results
-    #   id: cached-results
-    #   run: |
-    #       CACHE_RESULT_STAMP="${{ github.workspace }}/.test-results/${{ matrix.system }}-nested-success"
-    #       echo "CACHE_RESULT_STAMP=$CACHE_RESULT_STAMP" >> $GITHUB_ENV
-    #       if [ -e "$CACHE_RESULT_STAMP" ]; then
-    #           echo "::set-output name=already-ran::true"
-    #       fi
-    # - name: Run spread tests
-    #   if: "steps.cached-results.outputs.already-ran != 'true'"
-    #   run: |
-    #       env
-    # - name: Cache successful run
-    #   run: |
-    #     mkdir -p $(dirname "$CACHE_RESULT_STAMP")
-    #     touch "$CACHE_RESULT_STAMP"
+    - name: Cache snapd test results
+      id: cache-snapd-test-results
+      uses: actions/cache@v1
+      with:
+        path: "${{ github.workspace }}/.test-results"
+        key: "${{ github.run_id }}-${{ github.job }}-${{ matrix.system }}-nested-results"
+    - name: Check cached test results
+      id: cached-results
+      run: |
+          CACHE_RESULT_STAMP="${{ github.workspace }}/.test-results/${{ matrix.system }}-nested-success"
+          echo "CACHE_RESULT_STAMP=$CACHE_RESULT_STAMP" >> $GITHUB_ENV
+          if [ -e "$CACHE_RESULT_STAMP" ]; then
+              echo "::set-output name=already-ran::true"
+          fi
+    - name: Run spread tests
+      if: "steps.cached-results.outputs.already-ran != 'true'"
+      run: |
+          env
+    - name: Cache successful run
+      run: |
+        mkdir -p $(dirname "$CACHE_RESULT_STAMP")
+        touch "$CACHE_RESULT_STAMP"
